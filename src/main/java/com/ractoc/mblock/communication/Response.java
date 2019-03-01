@@ -3,19 +3,19 @@ package com.ractoc.mblock.communication;
 import java.util.stream.Stream;
 
 public final class Response {
-    private final byte command;
-    private final Stream<String> data;
+    private final String command;
+    private final String[] data;
 
-    public Response(byte command, Stream<String> data) {
+    public Response(String command, String[] data) {
         this.command = command;
         this.data = data;
     }
 
-    public byte getCommand() {
+    public String getCommand() {
         return command;
     }
 
-    public Stream<String> getData() {
+    public String[] getData() {
         return data;
     }
 }

@@ -52,9 +52,10 @@ public class ConnectionListener implements SerialPortEventListener {
 
     private void processResponse(String response) {
         if (response.contains("|")) {
+            System.out.println("response: " + response);
             String[] content = response.trim().split("\\|");
-            byte command = Byte.parseByte(content[0].substring(0, content[0].lastIndexOf('.')));
-            listener.responseReceived(new Response(command, Arrays.stream(content).skip(1)));
+            String command = content[0];
+            listener.responseReceived(new Response(command, Arrays.stream(content).skip(1).peek(System.out::println).toArray(String[]::new)));
         }
     }
 }
