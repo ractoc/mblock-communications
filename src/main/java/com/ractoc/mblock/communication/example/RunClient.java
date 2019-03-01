@@ -37,9 +37,9 @@ public class RunClient implements IncomingMessageListener {
     private void runProgram() throws IOException {
         connection.writeCommand(playNote((byte)124, (byte) 124));
         //connection.writeCommand(moveForward((byte) 180));
-        for (int i=0;i<100;i++) {
+        for (int i=0;i<10;i++) {
             connection.writeCommand(sensor((byte) 1));
-            interval(100L);
+            interval(1000L);
         }
         connection.writeCommand(moveStop());
         connection.writeCommand(setAllOnboardLEDsSingleColor((byte)0));
@@ -89,6 +89,13 @@ public class RunClient implements IncomingMessageListener {
             if (Integer.parseInt(data[1]) < 200) {
                 try {
                     connection.writeCommand(setAllOnboardLEDsSingleColor((byte)100));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+            if (Integer.parseInt(data[1]) >800) {
+                try {
+                    connection.writeCommand(setAllOnboardLEDsSingleColor((byte)0));
                 } catch (IOException e) {
                     e.printStackTrace();
                 }
