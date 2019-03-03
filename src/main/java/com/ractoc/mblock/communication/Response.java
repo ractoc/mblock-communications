@@ -1,21 +1,17 @@
 package com.ractoc.mblock.communication;
 
-import java.util.stream.Stream;
+import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 
+@Getter
+@RequiredArgsConstructor
 public final class Response {
+    /**
+     * The command this response is related to
+     */
     private final String command;
+    /**
+     * The payload of the incoming response.
+     */
     private final String[] data;
-
-    public Response(String command, String[] data) {
-        this.command = command;
-        this.data = data;
-    }
-
-    public String getCommand() {
-        return command;
-    }
-
-    public String[] getData() {
-        return data;
-    }
 }

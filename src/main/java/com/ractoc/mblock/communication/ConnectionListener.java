@@ -11,14 +11,24 @@ import java.util.Arrays;
 
 public class ConnectionListener implements SerialPortEventListener {
 
-    private final IncomingMessageListener listener;
+    private final IncomingMessageListener[] listeners;
     private final InputStream inputStream;
 
-    public ConnectionListener(SerialPort serialPort, IncomingMessageListener listener) throws IOException {
+    /**
+     * Creates a {@link SerialPortEventListener} to listen to incoming responses. These are then forwarded to the connected array of {@link IncomingMessageListener}
+     * @param serialPort The {@link SerialPort} to listen to for responses.
+     * @param listeners The array of {@link IncomingMessageListener} to forward the response to.
+     * @throws IOException Unable to get an {@link InputStream} on the {@link SerialPort}
+     */
+    public ConnectionListener(SerialPort serialPort, IncomingMessageListener... listeners) throws IOException {
         inputStream = serialPort.getInputStream();
-        this.listener = listener;
+        this.listeners = listeners;
     }
 
+    /**
+     * {@inheritDoc}
+     */
+    @Override
     public void serialEvent(SerialPortEvent event) {
         switch (event.getEventType()) {
             case SerialPortEvent.BI:
@@ -50,12 +60,16 @@ public class ConnectionListener implements SerialPortEventListener {
         }
     }
 
-    private void processResponse(String response) {
-        if (response.contains("|")) {
-            System.out.println("response: " + response);
-            String[] content = response.trim().split("\\|");
+    private void processResponse(String responseString) {
+        if (responseString.contains("|")) {
+            System.out.println("response: " + responseString);
+            String[] content = responseString.trim().split("\\|");
             String command = content[0];
-            listener.responseReceived(new Response(command, Arrays.stream(content).skip(1).peek(System.out::println).toArray(String[]::new)));
+            // skip the first entry in the content array since this is the command. Everything else is the payload
+            Response response = new Response(command, Arrays.stream(content).skip(1).toArray(String[]::new));
+            for (IncomingMessageListener listener : listeners) {
+                listener.responseReceived(response);
+            }
         }
     }
 }

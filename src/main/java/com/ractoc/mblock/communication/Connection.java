@@ -1,6 +1,5 @@
 package com.ractoc.mblock.communication;
 
-import com.ractoc.mblock.communication.example.RunClient;
 import purejavacomm.CommPortIdentifier;
 import purejavacomm.PortInUseException;
 import purejavacomm.SerialPort;
@@ -8,19 +7,26 @@ import purejavacomm.UnsupportedCommOperationException;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.util.Collections;
-import java.util.Enumeration;
 import java.util.TooManyListenersException;
-import java.util.stream.Stream;
 
-public class Connection implements AutoCloseable {
+/**
+ * The actual serial connection
+ */
+class Connection implements AutoCloseable {
 
     private SerialPort serialPort;
 
-    public Connection(CommPortIdentifier portId, IncomingMessageListener listener) throws IOException {
+    /**
+     * Creates the actual connection on the indicated port id and adds the supplied listeners
+     *
+     * @param portId    The Comm port id on which the robot is connected
+     * @param listeners The listeners which handle incoming responses
+     * @throws IOException Something went wrong while setting up the connection
+     */
+    Connection(CommPortIdentifier portId, IncomingMessageListener... listeners) throws IOException {
         try {
             serialPort = (SerialPort) portId.open("SimpleReadApp", 2000);
-            serialPort.addEventListener(new ConnectionListener(serialPort, listener));
+            serialPort.addEventListener(new ConnectionListener(serialPort, listeners));
             serialPort.notifyOnDataAvailable(true);
             serialPort.setSerialPortParams(115200,
                     SerialPort.DATABITS_8,
@@ -31,18 +37,22 @@ public class Connection implements AutoCloseable {
         }
     }
 
-    public static Stream<CommPortIdentifier> getComPorts() {
-        Enumeration<CommPortIdentifier> portList = CommPortIdentifier.getPortIdentifiers();
-        return Collections.list(portList).stream();
-    }
-
-    public void writeCommand(Command command) throws IOException {
+    /**
+     * Write the command to the robot
+     *
+     * @param command The command to send to the robot
+     * @throws IOException Something went wrong while sending the command
+     */
+    void writeCommand(Command command) throws IOException {
         OutputStream out = serialPort.getOutputStream();
         out.write(command.getCommand());
         out.write(command.getData());
         out.flush();
     }
 
+    /**
+     * Close the connection to the robot. Has to be public because of inheritance even though it is not really needed here.
+     */
     @Override
     public void close() {
         serialPort.close();
